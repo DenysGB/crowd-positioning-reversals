@@ -1,0 +1,40 @@
+DATA NOTES  (BTCUSDT, ETHUSDT | Binance Futures USDT-M | all public, real data)
+
+1) klines_<SYM>_1h.csv
+   Source: Binance Futures REST API (/fapi/v1/klines), public.
+   BTCUSDT: 2019-09-08 -> 2026-07-09
+   ETHUSDT: 2019-11-27 -> 2026-07-09
+   Columns: date, open, high, low, close, volume, quote_volume, trades,
+            taker_buy_base, taker_buy_quote.
+
+2) funding_<SYM>.csv
+   Source: Binance Futures REST API (/fapi/v1/fundingRate), public.
+   Full history from contract launch (funding settled every 8h).
+   BTCUSDT: 2019-09-10 -> 2026-07-09   ETHUSDT: 2019-11-27 -> 2026-07-09
+   Columns: date, fundingRate.
+
+3) metrics_<SYM>.csv
+   Source: official Binance archive data.binance.vision
+           (futures/um/daily/metrics/<SYM>/), bulk, public, no key.
+   5-minute cadence, contains in one file:
+     sum_open_interest, sum_open_interest_value,
+     count_toptrader_long_short_ratio, sum_toptrader_long_short_ratio,
+     count_long_short_ratio (global account ratio),
+     sum_taker_long_short_vol_ratio.
+   BTCUSDT: 2020-09-01 -> 2026-07-09   ETHUSDT: 2021-12-01 -> 2026-07-09
+
+4) liq_<SYM>.csv
+   Source: CryptoHFTData (cryptohftdata.com), event-level liquidations.
+   BTCUSDT: 2025-06-28 -> 2026-07-09   ETHUSDT: 2025-06-28 -> 2026-07-09
+   ~1 year only: this is the real start of free liquidation history for these
+   pairs (verified). Binance's own USDT-M liquidationSnapshot archive is empty;
+   longer history would require a paid provider.
+   Columns: event_time, symbol, side, order_type, quantity, price,
+            average_price, order_status, filled_quantity, trade_time.
+
+DERIVED (built by src/build.py):
+   panel_<SYM>.parquet / .csv  -- hourly panel:
+     close, ret, oi, ls_account, ls_top, funding.
+
+RESULTS (built by src/analysis.py):
+   results_btc.csv, results_eth.csv -- reversal spread by horizon.
